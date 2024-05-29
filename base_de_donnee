@@ -1,0 +1,97 @@
+
+CREATE DATABASE om_immobilier;
+
+-- Utiliser la base de données om_immobilier
+USE om_immobilier;
+
+-- Table Utilisateurs
+CREATE TABLE Utilisateurs (
+    ID_Utilisateur INT AUTO_INCREMENT PRIMARY KEY,
+    Nom VARCHAR(100),
+    Prenom VARCHAR(100),
+    Adresse VARCHAR(255),
+    Email VARCHAR(100) UNIQUE,
+    Type ENUM('Client', 'Agent', 'Administrateur'),
+    MotDePasse VARCHAR(255)  -- Assurez-vous de chiffrer les mots de passe en pratique
+);
+
+-- Table Clients
+CREATE TABLE Clients (
+    ID_Client INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Utilisateur INT,
+    Informations_Financieres TEXT,  -- Par exemple, détails de paiement, historiques
+    FOREIGN KEY (ID_Utilisateur) REFERENCES Utilisateurs(ID_Utilisateur)
+);
+
+-- Table Agents_Immobiliers
+CREATE TABLE Agents_Immobiliers (
+    ID_Agent INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Utilisateur INT,
+    Telephone VARCHAR(20),
+    CV TEXT,
+    Disponibilite TEXT,
+    FOREIGN KEY (ID_Utilisateur) REFERENCES Utilisateurs(ID_Utilisateur)
+);
+
+-- Table Administrateurs
+CREATE TABLE Administrateurs (
+    ID_Administrateur INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Utilisateur INT,
+    Privileges TEXT,  -- Par exemple, niveaux d'accès ou permissions spécifiques
+    FOREIGN KEY (ID_Utilisateur) REFERENCES Utilisateurs(ID_Utilisateur)
+);
+
+-- Table Biens_Immobiliers
+CREATE TABLE Biens_Immobiliers (
+    ID_Bien INT AUTO_INCREMENT PRIMARY KEY,
+    Type ENUM('Résidentiel', 'Commercial', 'Terrain', 'Location'),
+    Adresse VARCHAR(255),
+    Description TEXT,
+    Prix DECIMAL(10, 2),
+    ID_Agent INT,
+    Disponible BOOLEAN,
+    FOREIGN KEY (ID_Agent) REFERENCES Agents_Immobiliers(ID_Agent)
+);
+
+-- Table Rendez_Vous
+CREATE TABLE Rendez_Vous (
+    ID_RendezVous INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Client INT,
+    ID_Agent INT,
+    DateHeure DATETIME,
+    Statut ENUM('Confirmé', 'Annulé'),
+    FOREIGN KEY (ID_Client) REFERENCES Clients(ID_Client),
+    FOREIGN KEY (ID_Agent) REFERENCES Agents_Immobiliers(ID_Agent)
+);
+
+-- Table Transactions
+CREATE TABLE Transactions (
+    ID_Transaction INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Client INT,
+    ID_Bien INT,
+    Montant DECIMAL(10, 2),
+    Date DATE,
+    Methode_Paiement ENUM('Carte', 'PayPal', 'Chèque'),
+    FOREIGN KEY (ID_Client) REFERENCES Clients(ID_Client),
+    FOREIGN KEY (ID_Bien) REFERENCES Biens_Immobiliers(ID_Bien)
+);
+
+-- Table Messages
+CREATE TABLE Messages (
+    ID_Message INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Expediteur INT,
+    ID_Destinataire INT,
+    Contenu TEXT,
+    DateHeure DATETIME,
+    FOREIGN KEY (ID_Expediteur) REFERENCES Utilisateurs(ID_Utilisateur),
+    FOREIGN KEY (ID_Destinataire) REFERENCES Utilisateurs(ID_Utilisateur)
+);
+
+-- Table Evenements_Speciaux
+CREATE TABLE Evenements_Speciaux (
+    ID_Evenement INT AUTO_INCREMENT PRIMARY KEY,
+    Titre VARCHAR(255),
+    Description TEXT,
+    DateHeure DATETIME,
+    Type VARCHAR(100)
+);
