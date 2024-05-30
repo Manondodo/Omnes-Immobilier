@@ -1,6 +1,6 @@
 @font-face {
             font-family: 'Balkind';
-            src: url('path_to_font/Balkind.ttf') format('truetype'); /* Remplacez par le chemin réel de votre police */
+            src: url('path_to_font/Balkind.ttf') format('truetype'); 
         }
 
         /* Styles de base */
