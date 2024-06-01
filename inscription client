@@ -1,0 +1,44 @@
+<?php
+session_start();
+include 'db.php'; // Inclure le script de connexion à la base de données
+
+if ($conn->connect_error) {
+    die("Connexion échouée: " . $conn->connect_error);
+}
+
+// Récupérer les données du formulaire
+$nom = $_POST['nom'];
+$prenom = $_POST['prenom'];
+$adresse = $_POST['adresse'];
+$email = $_POST['email'];
+$password = $_POST['password']; // Assurez-vous d'utiliser un mot de passe fort en pratique
+$informations_financieres = $_POST['informations_financieres'];
+
+// Insérer l'utilisateur dans la table Utilisateurs
+$insert_user_query = $conn->prepare("INSERT INTO Utilisateurs (Nom, Prenom, Adresse, Email, Type, MotDePasse) VALUES (?, ?, ?, ?, 'Client', ?)");
+$insert_user_query->bind_param("sssss", $nom, $prenom, $adresse, $email, $password);
+
+if ($insert_user_query->execute()) {
+    $user_id = $conn->insert_id;
+
+    // Insérer les informations du client dans la table Clients
+    $insert_client_query = $conn->prepare("INSERT INTO Clients (ID_Utilisateur, Informations_Financieres) VALUES (?, ?)");
+    $insert_client_query->bind_param("is", $user_id, $informations_financieres);
+
+    if ($insert_client_query->execute()) {
+        $_SESSION['success_message'] = "Inscription réussie. Vous pouvez maintenant vous connecter.";
+    } else {
+        $_SESSION['error_message'] = "Erreur lors de l'ajout du client: " . $conn->error;
+    }
+
+    $insert_client_query->close();
+} else {
+    $_SESSION['error_message'] = "Erreur lors de l'ajout de l'utilisateur: " . $conn->error;
+}
+
+$insert_user_query->close();
+$conn->close();
+
+header("Location: inscription_client.php");
+exit();
+?>
