@@ -1,0 +1,44 @@
+<?php
+session_start();
+include 'db.php'; 
+
+if ($conn->connect_error) {
+    die("Connexion échouée: " . $conn->connect_error);
+}
+
+// Récupérer les données du formulaire
+$nom = $_POST['nom'];
+$prenom = $_POST['prenom'];
+$email = $_POST['email'];
+$telephone = $_POST['telephone'];
+$cv = $_POST['cv'];
+$password = $_POST['password']; 
+
+// Insérer l'utilisateur dans la table Utilisateurs
+$insert_user_query = $conn->prepare("INSERT INTO Utilisateurs (Nom, Prenom, Email, Type, MotDePasse) VALUES (?, ?, ?, 'Agent', ?)");
+$insert_user_query->bind_param("ssss", $nom, $prenom, $email, $password);
+
+if ($insert_user_query->execute()) {
+    $user_id = $conn->insert_id;
+
+    // Insérer les informations de l'agent immobilier dans la table Agents_Immobiliers
+    $insert_agent_query = $conn->prepare("INSERT INTO Agents_Immobiliers (ID_Utilisateur, Telephone, CV) VALUES (?, ?, ?)");
+    $insert_agent_query->bind_param("iss", $user_id, $telephone, $cv);
+
+    if ($insert_agent_query->execute()) {
+        $_SESSION['success_message'] = "Agent immobilier ajouté avec succès.";
+    } else {
+        $_SESSION['error_message'] = "Erreur lors de l'ajout de l'agent immobilier: " . $conn->error;
+    }
+
+    $insert_agent_query->close();
+} else {
+    $_SESSION['error_message'] = "Erreur lors de l'ajout de l'utilisateur: " . $conn->error;
+}
+
+$insert_user_query->close();
+$conn->close();
+
+header("Location: compte_admin.php");
+exit();
+?>
