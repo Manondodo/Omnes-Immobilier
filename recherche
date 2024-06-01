@@ -1,0 +1,381 @@
+<?php
+    // Configuration de la base de données
+    $servername = "localhost";
+    $username = "root"; // Remplacez par votre nom d'utilisateur MySQL
+    $password = ""; // Remplacez par votre mot de passe MySQL
+    $dbname = "om_immobilier";
+
+    // Connexion à la base de données
+    $conn = new mysqli($servername, $username, $password, $dbname);
+
+    // Vérifier la connexion
+    if ($conn->connect_error) {
+        die("Connexion échouée : " . $conn->connect_error);
+    }
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche - Omnes Immobilier</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .search-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+        }
+
+        .search-box {
+            display: flex;
+            background-color: #7c7c7c;
+            border-radius: 50px;
+            padding: 10px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            border-radius: 50px 0 0 50px;
+            padding: 10px 20px;
+            font-size: 18px;
+            outline: none;
+        }
+
+        .search-box button {
+            border: none;
+            border-radius: 0 50px 50px 0;
+            background: rgba(255, 255, 255, 0.1);
+            color: black;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 18px;
+            outline: none;
+            transition: background-color 0.3s;
+        }
+
+        .search-box button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .results {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .agent-info, .property-info {
+            background-color: #000;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .agent-photo {
+            width: 150px;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .agent-name, .property-name {
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .agent-buttons button, .property-buttons button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .agent-buttons button:hover, .property-buttons button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .property img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: transform 0.3s;
+        }
+
+        .property img:hover {
+            transform: scale(1.05);
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <img src="images/logo.png" alt="Logo" width="100" height="50">
+            <h1>OMNES IMMOBILIER</h1>
+        </header>
+        <nav>
+            <a href="index.php" class="nav-button">Accueil</a>
+            <a href="tout_parcourir.php" class="nav-button">Tout Parcourir</a>
+            <a href="recherche.php" class="nav-button">Recherche</a>
+            <a href="rendez_vous.php" class="nav-button">Rendez-vous</a>
+            <a href="login.php" class="nav-button">Votre Compte</a>
+        </nav>
+        <div class="section">
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Nom d’un agent immobilier ou Numéro d’une propriété ou Ville">
+                    <button onclick="search()">Rechercher</button>
+                </div>
+            </div>
+            <div class="results" id="results"></div>
+        </div>
+        <footer>
+            <p>Contactez-nous par mail à contact@omnes-immobilier.com, par téléphone au 01 23 45 67 89, ou à notre adresse physique : 123 Rue de l'Immobilier, Paris, France.</p>
+            <img src="images/map.jpg" alt="Map" width="150" height="130">
+        </footer>
+    </div>
+    <script>
+        function search() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const resultsContainer = document.getElementById('results');
+
+            // Simuler les résultats de recherche pour l'exemple
+            if (query === 'manon giraudeau') {
+                resultsContainer.innerHTML = `
+                    <div class="agent-info">
+                        <img src="images/agent1.jpg" class="agent-photo" alt="Manon Giraudeau">
+                        <h2 class="agent-name">Manon Giraudeau</h2>
+                        <p>Propriétés: 001 - 002</p>
+                        <p>Ville: Paris</p>
+                        <div class="agent-buttons">
+                            <button onclick="window.location.href='prendre_rdv.html'">Prendre Rendez-vous</button>
+                            <button onclick="window.location.href='contacter.html'">Contacter</button>
+                            <button onclick="window.location.href='cv.html'">Voir son CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === 'gilles foucart') {
+                resultsContainer.innerHTML = `
+                    <div class="agent-info">
+                        <img src="images/agent2.jpg" class="agent-photo" alt="Gilles Foucart">
+                        <h2 class="agent-name">Gilles Foucart</h2>
+                        <p>Propriétés: 101 - 102</p>
+                        <p>Ville: Paris</p>
+                        <div class="agent-buttons">
+                            <button onclick="window.location.href='prendre_rdv.html'">Prendre Rendez-vous</button>
+                            <button onclick="window.location.href='contacter.html'">Contacter</button>
+                            <button onclick="window.location.href='cv.html'">Voir son CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === 'antonin arnaune') {
+                resultsContainer.innerHTML = `
+                    <div class="agent-info">
+                        <img src="images/agent3.jpg" class="agent-photo" alt="Antonin Arnaune">
+                        <h2 class="agent-name">Antonin Arnaune</h2>
+                        <p>Propriétés: 201 - 202</p>
+                        <p>Ville: Paris</p>
+                        <div class="agent-buttons">
+                            <button onclick="window.location.href='prendre_rdv.html'">Prendre Rendez-vous</button>
+                            <button onclick="window.location.href='contacter.html'">Contacter</button>
+                            <button onclick="window.location.href='cv.html'">Voir son CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === 'ulysse robinet') {
+                resultsContainer.innerHTML = `
+                    <div class="agent-info">
+                        <img src="images/agent4.jpg" class="agent-photo" alt="Ulysse Robinet">
+                        <h2 class="agent-name">Ulysse Robinet</h2>
+                        <p>Propriétés: 301 - 302</p>
+                        <p>Ville: Paris</p>
+                        <div class="agent-buttons">
+                            <button onclick="window.location.href='prendre_rdv.html'">Prendre Rendez-vous</button>
+                            <button onclick="window.location.href='contacter.html'">Contacter</button>
+                            <button onclick="window.location.href='cv.html'">Voir son CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === '001') {
+                resultsContainer.innerHTML = `
+                    <div class="property-info">
+                        <img src="images/residential1.jpg" alt="Propriété 001">
+                        <h2 class="property-name">Propriété 001</h2>
+                        <p><strong>Descriptions:</strong> 4 pièces, 2 chambres, 120m², 3ème étage, balcon, parking</p>
+                        <p><strong>Adresse:</strong> 123 Rue Exemple, Paris</p>
+                        <p><strong>Vidéo:</strong></p>
+                        <video width="320" height="240" controls>
+                            <source src="videos/residential1.mp4" type="video/mp4">
+                            Votre navigateur ne supporte pas la balise vidéo.
+                        </video>
+                        <h3>Contactez notre Agent Immobilier</h3>
+                        <img src="images/agent1.jpg" alt="MG" class="agent-photo">
+                        <p class="agent-name">Manon GIRAUDEAU</p>
+                        <p><strong>Téléphone:</strong> +33 01 23 45 67 90</p>
+                        <p><strong>Email:</strong> manon.giraudeau@omnesimmobilier.fr</p>
+                        <div class="agent-buttons">
+                            <button onclick="location.href='agent_detail.html?id=001'">Prendre un RDV</button>
+                            <button onclick="location.href='contact_agent.html?id=001'">Contacter l'agent</button>
+                            <button onclick="location.href='cv_agent.html?id=001'">Voir le CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === '002') {
+                resultsContainer.innerHTML = `
+                    <div class="property-info">
+                        <img src="images/residential2.jpg" alt="Propriété 002">
+                        <h2 class="property-name">Propriété 002</h2>
+                        <p><strong>Descriptions:</strong> 3 pièces, 1 chambre, 85m², 2ème étage, balcon</p>
+                        <p><strong>Adresse:</strong> 456 Rue Exemple, Lyon</p>
+                        <h3>Contactez notre Agent Immobilier</h3>
+                        <img src="images/agent1.jpg" alt="MG" class="agent-photo">
+                        <p class="agent-name">Manon GIRAUDEAU</p>
+                        <p><strong>Téléphone:</strong> +33 01 23 45 67 90</p>
+                        <p><strong>Email:</strong> manon.giraudeau@omnesimmobilier.fr</p>
+                        <div class="agent-buttons">
+                            <button onclick="location.href='agent_detail.html?id=002'">Prendre un RDV</button>
+                            <button onclick="location.href='contact_agent.html?id=002'">Contacter l'agent</button>
+                            <button onclick="location.href='cv_agent.html?id=002'">Voir le CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === '101') {
+                resultsContainer.innerHTML = `
+                    <div class="property-info">
+                        <img src="images/commercial1.jpg" alt="Propriété 101">
+                        <h2 class="property-name">Propriété 101</h2>
+                        <p><strong>Descriptions:</strong> Bureaux, 300m², centre-ville</p>
+                        <p><strong>Adresse:</strong> 789 Rue Exemple, Marseille</p>
+                        <h3>Contactez notre Agent Immobilier</h3>
+                        <img src="images/agent2.jpg" alt="GF" class="agent-photo">
+                        <p class="agent-name">Gilles FOUCART</p>
+                        <p><strong>Téléphone:</strong> +33 01 23 45 83 08</p>
+                        <p><strong>Email:</strong> gilles.foucart@omnesimmobilier.fr</p>
+                        <div class="agent-buttons">
+                            <button onclick="location.href='agent_detail.html?id=101'">Prendre un RDV</button>
+                            <button onclick="location.href='contact_agent.html?id=101'">Contacter l'agent</button>
+                            <button onclick="location.href='cv_agent.html?id=101'">Voir le CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === '102') {
+                resultsContainer.innerHTML = `
+                    <div class="property-info">
+                        <img src="images/commercial2.jpg" alt="Propriété 102">
+                        <h2 class="property-name">Propriété 102</h2>
+                        <p><strong>Descriptions:</strong> Local commercial, 200m², proche gare</p>
+                        <p><strong>Adresse:</strong> 321 Rue Exemple, Bordeaux</p>
+                        <h3>Contactez notre Agent Immobilier</h3>
+                        <img src="images/agent2.jpg" alt="GF" class="agent-photo">
+                        <p class="agent-name">Gilles FOUCART</p>
+                        <p><strong>Téléphone:</strong> +33 01 23 45 83 08</p>
+                        <p><strong>Email:</strong> gilles.foucart@omnesimmobilier.fr</p>
+                        <div class="agent-buttons">
+                            <button onclick="location.href='agent_detail.html?id=102'">Prendre un RDV</button>
+                            <button onclick="location.href='contact_agent.html?id=102'">Contacter l'agent</button>
+                            <button onclick="location.href='cv_agent.html?id=102'">Voir le CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === '201') {
+                resultsContainer.innerHTML = `
+                    <div class="property-info">
+                        <img src="images/land1.jpg" alt="Propriété 201">
+                        <h2 class="property-name">Propriété 201</h2>
+                        <p><strong>Descriptions:</strong> Terrain de 1500m²</p>
+                        <p><strong>Adresse:</strong> 654 Rue Exemple, Nantes</p>
+                        <h3>Contactez notre Agent Immobilier</h3>
+                        <img src="images/agent3.jpg" alt="AA" class="agent-photo">
+                        <p class="agent-name">Antonin ARNAUNE</p>
+                        <p><strong>Téléphone:</strong> +33 01 23 45 32 77</p>
+                        <p><strong>Email:</strong> antonin.arnaune@omnesimmobilier.fr</p>
+                        <div class="agent-buttons">
+                            <button onclick="location.href='agent_detail.html?id=201'">Prendre un RDV</button>
+                            <button onclick="location.href='contact_agent.html?id=201'">Contacter l'agent</button>
+                            <button onclick="location.href='cv_agent.html?id=201'">Voir le CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === '202') {
+                resultsContainer.innerHTML = `
+                    <div class="property-info">
+                        <img src="images/land2.jpg" alt="Propriété 202">
+                        <h2 class="property-name">Propriété 202</h2>
+                        <p><strong>Descriptions:</strong> Terrain agricole de 2000m²</p>
+                        <p><strong>Adresse:</strong> 987 Rue Exemple, Lille</p>
+                        <h3>Contactez notre Agent Immobilier</h3>
+                        <img src="images/agent3.jpg" alt="AA" class="agent-photo">
+                        <p class="agent-name">Antonin ARNAUNE</p>
+                        <p><strong>Téléphone:</strong> +33 01 23 45 32 77</p>
+                        <p><strong>Email:</strong> antonin.arnaune@omnesimmobilier.fr</p>
+                        <div class="agent-buttons">
+                            <button onclick="location.href='agent_detail.html?id=202'">Prendre un RDV</button>
+                            <button onclick="location.href='contact_agent.html?id=202'">Contacter l'agent</button>
+                            <button onclick="location.href='cv_agent.html?id=202'">Voir le CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === '301') {
+                resultsContainer.innerHTML = `
+                    <div class="property-info">
+                        <img src="images/rent1.jpg" alt="Propriété 301">
+                        <h2 class="property-name">Propriété 301</h2>
+                        <p><strong>Descriptions:</strong> 2 pièces, 1 chambre, 50m², 1er étage</p>
+                        <p><strong>Adresse:</strong> 111 Rue Exemple, Nice</p>
+                        <h3>Contactez notre Agent Immobilier</h3>
+                        <img src="images/agent3.jpg" alt="AA" class="agent-photo">
+                        <p class="agent-name">Antonin ARNAUNE</p>
+                        <p><strong>Téléphone:</strong> +33 01 23 45 32 77</p>
+                        <p><strong>Email:</strong> antonin.arnaune@omnesimmobilier.fr</p>
+                        <div class="agent-buttons">
+                            <button onclick="location.href='agent_detail.html?id=301'">Prendre un RDV</button>
+                            <button onclick="location.href='contact_agent.html?id=301'">Contacter l'agent</button>
+                            <button onclick="location.href='cv_agent.html?id=301'">Voir le CV</button>
+                        </div>
+                    </div>
+                `;
+            } else if (query === '302') {
+                resultsContainer.innerHTML = `
+                    <div class="property-info">
+                        <img src="images/rent2.jpg" alt="Propriété 302">
+                        <h2 class="property-name">Propriété 302</h2>
+                        <p><strong>Descriptions:</strong> Studio, 35m², 2ème étage</p>
+                        <p><strong>Adresse:</strong> 222 Rue Exemple, Toulouse</p>
+                        <h3>Contactez notre Agent Immobilier</h3>
+                        <img src="images/agent3.jpg" alt="AA" class="agent-photo">
+                        <p class="agent-name">Antonin ARNAUNE</p>
+                        <p><strong>Téléphone:</strong> +33 01 23 45 32 77</p>
+                        <p><strong>Email:</strong> antonin.arnaune@omnesimmobilier.fr</p>
+                        <div class="agent-buttons">
+                            <button onclick="location.href='agent_detail.html?id=302'">Prendre un RDV</button>
+                            <button onclick="location.href='contact_agent.html?id=302'">Contacter l'agent</button>
+                            <button onclick="location.href='cv_agent.html?id=302'">Voir le CV</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsContainer.innerHTML = `<p>Aucun résultat trouvé pour : ${query}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
