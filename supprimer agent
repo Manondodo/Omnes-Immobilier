@@ -1,0 +1,42 @@
+<?php
+session_start();
+include 'db.php'; // Inclure le script de connexion à la base de données
+
+if ($conn->connect_error) {
+    die("Connexion échouée: " . $conn->connect_error);
+}
+
+// Vérifier si l'ID de l'agent a été passé en paramètre
+if (isset($_GET['id'])) {
+    $id_utilisateur = $_GET['id'];
+
+    // Supprimer l'agent immobilier de la base de données
+    $delete_agent_query = $conn->prepare("DELETE FROM Agents_Immobiliers WHERE ID_Utilisateur = ?");
+    $delete_agent_query->bind_param("i", $id_utilisateur);
+
+    if ($delete_agent_query->execute()) {
+        // Supprimer l'utilisateur correspondant
+        $delete_user_query = $conn->prepare("DELETE FROM Utilisateurs WHERE ID_Utilisateur = ?");
+        $delete_user_query->bind_param("i", $id_utilisateur);
+
+        if ($delete_user_query->execute()) {
+            $_SESSION['success_message'] = "Agent immobilier supprimé avec succès.";
+        } else {
+            $_SESSION['error_message'] = "Erreur lors de la suppression de l'utilisateur: " . $conn->error;
+        }
+
+        $delete_user_query->close();
+    } else {
+        $_SESSION['error_message'] = "Erreur lors de la suppression de l'agent immobilier: " . $conn->error;
+    }
+
+    $delete_agent_query->close();
+} else {
+    $_SESSION['error_message'] = "ID de l'agent immobilier manquant.";
+}
+
+$conn->close();
+
+header("Location: compte_admin.php");
+exit();
+?>
