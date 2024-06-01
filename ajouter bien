@@ -1,0 +1,30 @@
+<?php
+session_start();
+include 'db.php'; 
+
+if ($conn->connect_error) {
+    die("Connexion échouée: " . $conn->connect_error);
+}
+
+// Récupérer les données du formulaire
+$adresse = $_POST['adresse'];
+$description = $_POST['description'];
+$prix = $_POST['prix'];
+$type = $_POST['type'];
+
+// Insérer le bien immobilier dans la base de données
+$insert_bien_query = $conn->prepare("INSERT INTO Biens_Immobiliers (Adresse, Description, Prix, Type) VALUES (?, ?, ?, ?)");
+$insert_bien_query->bind_param("ssds", $adresse, $description, $prix, $type);
+
+if ($insert_bien_query->execute()) {
+    $_SESSION['success_message'] = "Bien immobilier ajouté avec succès.";
+} else {
+    $_SESSION['error_message'] = "Erreur lors de l'ajout du bien immobilier: " . $conn->error;
+}
+
+$insert_bien_query->close();
+$conn->close();
+
+header("Location: compte_admin.php");
+exit();
+?>
