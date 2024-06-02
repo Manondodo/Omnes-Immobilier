@@ -1,11 +1,9 @@
 <?php
 session_start();
 include 'db.php'; 
-
 if ($conn->connect_error) {
     die("Connexion échouée: " . $conn->connect_error);
 }
-
 // Récupérer les données du formulaire
 $nom = $_POST['nom'];
 $prenom = $_POST['prenom'];
