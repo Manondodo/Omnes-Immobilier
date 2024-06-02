@@ -1,0 +1,32 @@
+<?php
+session_start();
+include 'db.php'; // Inclure le script de connexion à la base de données
+
+if ($conn->connect_error) {
+    die("Connexion échouée: " . $conn->connect_error);
+}
+
+// Vérifier si l'ID du bien a été passé en paramètre
+if (isset($_GET['id'])) {
+    $id_bien = $_GET['id'];
+
+    // Supprimer bien immobilier de base de données
+    $delete_bien_query = $conn->prepare("DELETE FROM Biens_Immobiliers WHERE ID_Bien = ?");
+    $delete_bien_query->bind_param("i", $id_bien);
+
+    if ($delete_bien_query->execute()) {
+        $_SESSION['success_message'] = "Bien immobilier supprimé avec succès.";
+    } else {
+        $_SESSION['error_message'] = "Erreur lors de la suppression du bien immobilier: " . $conn->error;
+    }
+
+    $delete_bien_query->close();
+} else {
+    $_SESSION['error_message'] = "ID du bien immobilier manquant.";
+}
+
+$conn->close();
+
+header("Location: compte_admin.php");
+exit();
+?>
