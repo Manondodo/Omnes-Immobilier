@@ -1,0 +1,71 @@
+<?php
+session_start();
+include 'db.php'; // Inclure le script de connexion à la base de données
+
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Client') {
+    header("Location: connexion.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['disponibilite_id'])) {
+    $disponibilite_id = $_POST['disponibilite_id'];
+
+    // Vérifiez si la disponibilité est toujours libre
+    $check_query = $conn->prepare("SELECT Disponible FROM disponibilite_agents WHERE ID_Disponibilite = ? AND Disponible = 1");
+    if ($check_query === false) {
+        $_SESSION['error_message'] = "Erreur de préparation de la requête : " . $conn->error;
+        header("Location: prendre_rdv.php");
+        exit();
+    }
+    $check_query->bind_param("i", $disponibilite_id);
+    $check_query->execute();
+    $check_result = $check_query->get_result();
+
+    if ($check_result->num_rows > 0) {
+        // Réserver le créneau
+        $update_query = $conn->prepare("UPDATE disponibilite_agents SET Disponible = 0 WHERE ID_Disponibilite = ?");
+        if ($update_query === false) {
+            $_SESSION['error_message'] = "Erreur de préparation de la mise à jour : " . $conn->error;
+            header("Location: prendre_rdv.php");
+            exit();
+        }
+        $update_query->bind_param("i", $disponibilite_id);
+
+        if ($update_query->execute()) {
+            // Ajouter un rendez-vous
+            $insert_rdv_query = $conn->prepare("INSERT INTO rendez_vous (ID_Agent, ID_Client, DateHeure, Statut) 
+                                                SELECT d.ID_Agent, (SELECT ID_Client FROM Clients WHERE ID_Utilisateur = ?), CONCAT(d.Jour, ' ', d.Periode), 'Pris' 
+                                                FROM disponibilite_agents d WHERE d.ID_Disponibilite = ?");
+            if ($insert_rdv_query === false) {
+                $_SESSION['error_message'] = "Erreur de préparation de l'insertion : " . $conn->error;
+                header("Location: prendre_rdv.php");
+                exit();
+            }
+            $insert_rdv_query->bind_param("ii", $user_id, $disponibilite_id);
+
+            if ($insert_rdv_query->execute()) {
+                $_SESSION['success_message'] = "Rendez-vous réservé avec succès.";
+            } else {
+                $_SESSION['error_message'] = "Erreur lors de la réservation du rendez-vous : " . $insert_rdv_query->error;
+            }
+
+            $insert_rdv_query->close();
+        } else {
+            $_SESSION['error_message'] = "Erreur lors de la mise à jour de la disponibilité : " . $update_query->error;
+        }
+
+        $update_query->close();
+    } else {
+        $_SESSION['error_message'] = "Le créneau n'est pas disponible.";
+    }
+
+    $check_query->close();
+    header("Location: prendre_rdv.php");
+    exit();
+}
+
+header("Location: prendre_rdv.php");
+exit();
+?>
