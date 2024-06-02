@@ -1,0 +1,223 @@
+<?php
+session_start();
+include 'db.php'; // Inclure le script de connexion à la base de données
+
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Client') {
+    header("Location: connexion.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+$query = $conn->prepare("SELECT Nom, Prenom, Email, Adresse FROM Utilisateurs WHERE ID_Utilisateur = ?");
+$query->bind_param("i", $user_id);
+$query->execute();
+$user_result = $query->get_result();
+$user = $user_result->fetch_assoc();
+
+$consultations_query = $conn->prepare("SELECT r.Jour, r.Heure, a.Nom, a.Prenom, a.Email 
+                                       FROM Rendez_Vous2 r 
+                                       JOIN Agents_Immobiliers ai ON r.ID_Agent = ai.ID_Agent 
+                                       JOIN Utilisateurs a ON ai.ID_Utilisateur = a.ID_Utilisateur 
+                                       WHERE r.ID_Client = (SELECT ID_Client FROM Clients WHERE ID_Utilisateur = ?) 
+                                       AND r.Statut = 'Confirmé'");
+$consultations_query->bind_param("i", $user_id);
+$consultations_query->execute();
+$consultations_result = $consultations_query->get_result();
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votre Compte - Client - Omnes Immobilier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Balkind';
+            src: url('path_to_font/Balkind.ttf') format('truetype'); /* Remplacez par le chemin réel de votre police */
+        }
+
+        /* Styles de base */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Lora', sans-serif;
+            color: #fff;
+            background-color: #1a1a1a;
+        }
+
+        .wrapper {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header, nav {
+            color: #fff;
+            padding: 20px 40px;
+            width: 100%;
+            text-align: center;
+        }
+
+        header h1 {
+            font-weight: bold;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border-radius: 20px;
+            text-decoration: none;
+        }
+
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #000;
+        }
+
+        .section {
+            padding: 60px;
+            margin: 50px auto 30px;
+            background-blend-mode: overlay;
+            background: url('images/accueil.jpg') no-repeat center center / cover;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .admin-section {
+            margin: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .admin-section h2 {
+            margin-bottom: 10px;
+        }
+
+        .admin-section form {
+            margin-bottom: 20px;
+        }
+
+        .admin-section form input, .admin-section form textarea, .admin-section form select {
+            display: block;
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .admin-section form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .admin-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .admin-section table th, .admin-section table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .admin-section table th {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .admin-section .btn-delete {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            background-color: #dc3545;
+            color: white;
+        }
+
+        footer {
+            background-color: #222;
+            color: #ccc;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            font-size: 16px;
+            border-top: 1px solid #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <h1>Votre Compte - Client</h1>
+        </header>
+        <nav>
+            <a href="accueil.php" class="nav-button">Accueil</a>
+            <a href="tout_parcourir.php" class="nav-button">Tout Parcourir</a>
+            <a href="recherche.php" class="nav-button">Recherche</a>
+            <a href="rendez_vous.php" class="nav-button">Rendez-vous</a>
+            <a href="connexion.php" class="nav-button">Votre Compte</a>
+        </nav>
+        <div class="section">
+            <div class="admin-section">
+                <h2>Informations du Client</h2>
+                <p><strong>Nom :</strong> <?php echo htmlspecialchars($user['Prenom']) . " " . htmlspecialchars($user['Nom']); ?></p>
+                <p><strong>Email :</strong> <?php echo htmlspecialchars($user['Email']); ?></p>
+                <p><strong>Adresse :</strong> <?php echo htmlspecialchars($user['Adresse']); ?></p>
+            </div>
+            <div class="admin-section">
+                <h2>Vos Rendez-vous</h2>
+                <?php
+                if ($consultations_result->num_rows > 0) {
+                    echo "<table>";
+                    echo "<tr><th>Jour</th><th>Heure</th><th>Nom de l'Agent</th><th>Email de l'Agent</th></tr>";
+                    while ($consultation = $consultations_result->fetch_assoc()) {
+                        echo "<tr>";
+                        echo "<td>" . htmlspecialchars($consultation['Jour']) . "</td>";
+                        echo "<td>" . htmlspecialchars($consultation['Heure']) . "</td>";
+                        echo "<td>" . htmlspecialchars($consultation['Prenom']) . " " . htmlspecialchars($consultation['Nom']) . "</td>";
+                        echo "<td><a href='mailto:" . htmlspecialchars($consultation['Email']) . "'>" . htmlspecialchars($consultation['Email']) . "</a></td>";
+                        echo "</tr>";
+                    }
+                    echo "</table>";
+                } else {
+                    echo "<p>Aucun rendez-vous trouvé.</p>";
+                }
+                ?>
+            </div>
+        </div>
+        <footer>
+            <p>Contactez-nous : <a href="mailto:contact@omnesimmobilier.fr">contact@omnesimmobilier.fr</a> | +33 01 23 45 67 89</p>
+        </footer>
+    </div>
+</body>
+</html>
+<?php
+$consultations_query->close();
+$conn->close();
+?>
