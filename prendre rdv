@@ -1,0 +1,54 @@
+<?php
+session_start();
+include 'db.php'; // Inclure le script de connexion à la base de données
+
+if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'Client') {
+    header("Location: connexion.php");
+    exit();
+}
+
+if (!isset($_GET['jour']) || !isset($_GET['heure']) || !isset($_GET['agent_id'])) {
+    echo "Paramètres manquants.";
+    exit();
+}
+
+$jour = $_GET['jour'];
+$heure = $_GET['heure'];
+$agent_id = intval($_GET['agent_id']);
+$user_id = $_SESSION['user_id'];
+
+// Obtenir l'ID du client basé sur l'ID de l'utilisateur
+$client_query = $conn->prepare("SELECT ID_Client FROM Clients WHERE ID_Utilisateur = ?");
+$client_query->bind_param("i", $user_id);
+$client_query->execute();
+$client_result = $client_query->get_result();
+
+if ($client_result->num_rows == 0) {
+    $_SESSION['error_message'] = "Client non trouvé.";
+    header("Location: agent.php?id=$agent_id");
+    exit();
+}
+
+$client = $client_result->fetch_assoc();
+$client_id = $client['ID_Client'];
+
+$query = $conn->prepare("INSERT INTO Rendez_Vous (ID_Client, ID_Agent, Jour, Heure, Statut) VALUES (?, ?, ?, ?, 'Confirmé')");
+$query->bind_param("iiss", $client_id, $agent_id, $jour, $heure);
+
+if ($query->execute()) {
+    $update_query = $conn->prepare("UPDATE Disponibilite_Agents SET Disponible = 0 WHERE ID_Agent = ? AND Jour = ? AND Heure = ?");
+    $update_query->bind_param("iss", $agent_id, $jour, $heure);
+    $update_query->execute();
+    $update_query->close();
+
+    $_SESSION['success_message'] = "Rendez-vous réservé avec succès.";
+} else {
+    $_SESSION['error_message'] = "Erreur lors de la réservation du rendez-vous.";
+}
+
+$query->close();
+$conn->close();
+
+header("Location: agent.php?id=$agent_id");
+exit();
+?>
