@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catégorie - Omnes Immobilier</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Balkind';
+            src: url('path_to_font/Balkind.ttf') format('truetype'); /* Remplacez par le chemin réel de votre police */
+        }
+
+        /* Styles de base */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Lora', sans-serif;
+            color: #fff;
+            background-color: #1a1a1a;
+        }
+
+        .wrapper {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header, nav {
+            color: #fff;
+            padding: 20px 40px;
+            width: 100%;
+            text-align: center;
+        }
+
+        header h1 {
+            font-weight: bold;
+        }
+
+        .nav-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 2px solid #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border-radius: 20px;
+            text-decoration: none;
+        }
+
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #000;
+        }
+
+        .section {
+            padding: 60px;
+            margin: 50px auto 30px;
+            background-blend-mode: overlay;
+            background: url('images/accueil.jpg') no-repeat center center / cover;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .category-section {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 10px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .property {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .property img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        footer {
+            background-color: #222;
+            color: #ccc;
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            font-size: 16px;
+            border-top: 1px solid #444;
+        }
+
+        .agent-link {
+            color: #ffc107;
+            text-decoration: none;
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .agent-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <img src="images/logo.png" alt="Logo" width="100" height="50">
+            <h1>OMNES IMMOBILIER</h1>
+        </header>
+        <nav>
+            <a href="accueil.php" class="nav-button">Accueil</a>
+            <a href="tout_parcourir.php" class="nav-button">Tout Parcourir</a>
+            <a href="recherche.php" class="nav-button">Recherche</a>
+            <a href="rendez_vous.php" class="nav-button">Rendez-vous</a>
+            <a href="connexion.php" class="nav-button">Votre Compte</a>
+        </nav>
+        <div class="section" id="category">
+            <?php
+            include 'db.php'; // Inclure le script de connexion à la base de données
+
+            if (isset($_GET['type'])) {
+                $type = mysqli_real_escape_string($conn, $_GET['type']);
+                echo "<h1>Catégorie : " . htmlspecialchars($type) . "</h1>";
+
+                $sql = "SELECT * FROM Biens_Immobiliers WHERE Type='$type'";
+                $result = $conn->query($sql);
+
+                if ($result === FALSE) {
+                    echo "Error: " . $conn->error;
+                } else if ($result->num_rows > 0) {
+                    while($row = $result->fetch_assoc()) {
+                        echo "<div class='property'>";
+                        echo "<img src='" . $row['image'] . "' alt='Image du bien immobilier'>";
+                        echo "<h3>" . $row['Adresse'] . "</h3>";
+                        echo "<p>" . $row['Description'] . "</p>";
+                        echo "<p>Prix: " . $row['Prix'] . " €</p>";
+                        echo "<a href='agent.php?id=" . $row['ID_Agent'] . "' class='agent-link'>Voir l'agent</a>";
+                        echo "</div>";
+                    }
+                } else {
+                    echo "<p>Aucun bien disponible dans cette catégorie.</p>";
+                }
+            } else {
+                echo "<p>Catégorie non spécifiée.</p>";
+            }
+
+            $conn->close();
+            ?>
+        </div>
+        <footer>
+            <p>Contactez-nous par mail à contact@omnes-immobilier.com, par téléphone au 01 23 45 67 89, ou à notre adresse physique : 123 Rue de l'Immobilier, Paris, France.</p>
+            <img src="images/map.jpg" alt="Map" width="150" height="130">
+        </footer>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
